@@ -64,11 +64,19 @@ static std::vector<std::string> flagsFromCommand(const CompileCommand &command) 
 static std::vector<std::string> flagsFromCommand(const CompileCommand &command,
                                                  const std::vector<std::string> &extraFlags) {
   std::vector<std::string> flags = flagsFromCommand(command);
+  /// The compilation database produced from running
+  /// clang ... -MJ <comp.database.json>
+  /// contains a file name in the "arguments" array. Since the file name
+  /// itself is not a compilation flag we filter it out.
+  flags.erase(std::remove(flags.begin(), flags.end(), command.file), flags.end());
+
   for (auto &extra : extraFlags) {
     flags.push_back(extra);
   }
   return flags;
 }
+
+void dummyPrinter(const llvm::SMDiagnostic &, void *Context) {}
 
 static std::map<std::string, std::vector<std::string>>
 loadDatabaseFromFile(const std::string &path, const std::vector<std::string> &extraFlags) {
@@ -84,12 +92,28 @@ loadDatabaseFromFile(const std::string &path, const std::vector<std::string> &ex
     Logger::error() << "Can not read compilation database: " << path << '\n';
   } else {
     auto buffer = bufferOrError->get();
-    llvm::yaml::Input json(buffer->getBuffer());
 
+    /// We don't want llvm::yaml::Input to print errors to llvm::errs() this is
+    /// why we give it a dummy printer.
+    llvm::yaml::Input json(buffer->getBuffer(), nullptr, dummyPrinter);
     json >> commands;
 
+    /// There is an edge case: compilation database produced by
+    /// clang -MJ <comp.db.json> creates a JSON file without enclosing [] braces.
+    /// We try to add the [...] braces on the fly and see if it fixes the parsing.
     if (json.error()) {
-      Logger::error() << "Can not read compilation database: " << path << '\n';
+      std::stringstream fixedBuffer;
+      fixedBuffer << "[";
+      fixedBuffer << buffer->getBuffer().str();
+      fixedBuffer << "]";
+
+      llvm::yaml::Input fixedJson(fixedBuffer.str());
+
+      fixedJson >> commands;
+
+      if (fixedJson.error()) {
+        Logger::error() << "Can not read compilation database: " << path << '\n';
+      }
     }
   }
 
