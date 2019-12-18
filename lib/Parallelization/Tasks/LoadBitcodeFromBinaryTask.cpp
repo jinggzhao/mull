@@ -1,7 +1,6 @@
 #include "mull/Parallelization/Tasks/LoadBitcodeFromBinaryTask.h"
 
 #include "mull/BitcodeLoader.h"
-#include "mull/Logger.h"
 #include "mull/Parallelization/Progress.h"
 
 #include <ebc/EmbeddedFile.h>
