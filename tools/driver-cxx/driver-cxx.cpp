@@ -6,6 +6,7 @@
 
 #include "CLIOptions.h"
 #include "DynamicLibraries.h"
+#include "mull/BitcodeMetadataReader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/ConfigurationOptions.h"
 #include "mull/Driver.h"
@@ -124,6 +125,10 @@ int main(int argc, char **argv) {
   auto dynamicLibraries =
       mull::findDynamicLibraries(tool::InputFile.getValue(), librarySearchPaths);
 
+  mull::BitcodeMetadataReader bitcodeCompilationDatabaseLoader;
+  std::string bitcodeCompilationFlags =
+      bitcodeCompilationDatabaseLoader.getCompilationDatabase(bitcode);
+
   mull::Program program(dynamicLibraries, {}, std::move(bitcode));
 
   mull::Toolchain toolchain(configuration);
@@ -133,6 +138,10 @@ int main(int argc, char **argv) {
   bool junkDetectionEnabled = false;
   std::string cxxCompilationFlags;
   std::string cxxCompilationDatabasePath;
+  if (!bitcodeCompilationFlags.empty()) {
+    cxxCompilationFlags = bitcodeCompilationFlags;
+    junkDetectionEnabled = true;
+  }
   if (!tool::CompilationFlags.empty()) {
     cxxCompilationFlags = tool::CompilationFlags.getValue();
     junkDetectionEnabled = true;
