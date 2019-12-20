@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
       mull::findDynamicLibraries(tool::InputFile.getValue(), librarySearchPaths);
 
   mull::BitcodeMetadataReader bitcodeCompilationDatabaseLoader;
-  std::string bitcodeCompilationFlags =
+  std::map<std::string, std::string> bitcodeCompilationFlags =
       bitcodeCompilationDatabaseLoader.getCompilationDatabase(bitcode);
 
   mull::Program program(dynamicLibraries, {}, std::move(bitcode));
@@ -139,7 +139,6 @@ int main(int argc, char **argv) {
   std::string cxxCompilationFlags;
   std::string cxxCompilationDatabasePath;
   if (!bitcodeCompilationFlags.empty()) {
-    cxxCompilationFlags = bitcodeCompilationFlags;
     junkDetectionEnabled = true;
   }
   if (!tool::CompilationFlags.empty()) {
@@ -150,7 +149,8 @@ int main(int argc, char **argv) {
     cxxCompilationDatabasePath = tool::CompilationDatabasePath.getValue();
     junkDetectionEnabled = true;
   }
-  mull::ASTStorage astStorage(cxxCompilationDatabasePath, cxxCompilationFlags);
+  mull::ASTStorage astStorage(
+      cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags);
   mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
   mull::CXXJunkDetector junkDetector(astStorage);
 

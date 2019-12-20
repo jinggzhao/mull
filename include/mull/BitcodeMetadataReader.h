@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <memory>
 #include <vector>
 
@@ -8,7 +9,8 @@ class Bitcode;
 
 class BitcodeMetadataReader {
 public:
-  std::string getCompilationDatabase(std::vector<std::unique_ptr<mull::Bitcode>> &bitcode);
+  std::map<std::string, std::string>
+  getCompilationDatabase(std::vector<std::unique_ptr<mull::Bitcode>> &bitcode);
 };
 
 } // namespace mull

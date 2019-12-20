@@ -39,7 +39,8 @@ private:
 class ASTStorage {
 public:
   ASTStorage(const std::string &cxxCompilationDatabasePath,
-             const std::string &cxxCompilationFlags);
+             const std::string &cxxCompilationFlags,
+             const std::map<std::string, std::string> &bitcodeCompilationFlags);
 
   ThreadSafeASTUnit *findAST(const MutationPoint *point);
 

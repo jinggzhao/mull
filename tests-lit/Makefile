@@ -6,7 +6,7 @@ help: ## Show this help message.
 
 MULL_EXEC ?= $(shell which mull-cxx)
 CLANG_EXEC ?= /opt/llvm-8.0.0/bin/clang++
-FILECHECK_EXEC=$(shell which filecheck)
+FILECHECK_EXEC ?= $(shell which filecheck)
 LIT=$(shell which lit)
 test: ## Run integration tests
 	CURRENT_DIR=$(PWD) \

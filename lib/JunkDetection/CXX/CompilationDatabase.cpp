@@ -111,9 +111,11 @@ loadDatabaseFromFile(const std::string &path, const std::vector<std::string> &ex
 }
 
 CompilationDatabase::CompilationDatabase(CompilationDatabase::Path path,
-                                         CompilationDatabase::Flags flags)
+                                         CompilationDatabase::Flags flags,
+                                         CompilationDatabase::BitcodeFlags bitcodeFlags)
     : extraFlags(filterFlags(flagsFromString(flags.getFlags()), false)),
-      database(loadDatabaseFromFile(path.getPath(), extraFlags)) {}
+      database(loadDatabaseFromFile(path.getPath(), extraFlags)),
+      bitcodeFlags(bitcodeFlags) {}
 
 const std::vector<std::string> &
 CompilationDatabase::compilationFlagsForFile(const std::string &filepath) const {
